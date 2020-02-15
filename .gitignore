@@ -1,0 +1,9 @@
+# Default ignored files
+/workspace.xml
+*.idea/
+*__pycache__/
+*.ipynb_checkpoints/
+*.xml
+*.csv
+*.xlsx
+*.iml
