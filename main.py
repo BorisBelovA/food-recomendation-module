@@ -31,17 +31,31 @@ class FoodRecomender:
         )):
             # Матрица коэффициентов похожести блюд
             cos_sims = self.preprocessor.load_cos_sims(
-                filename=os.path.join(self.settings.cosine_matrixes_path,'ingredients_cosine_similarity_matrix')
+                filename=os.path.join(self.settings.cosine_matrixes_path, 'ingredients_cosine_similarity_matrix')
             )
 
         indixes = self.preprocessor.create_indixes('id', self.preprocessor.open_file(GlobalSetting.raw_recepies_path, usecols=['id'], nrows=100))
         if(not meals_ids):
             print('нету мелсов')
         else:
+            # Массив идентификаторов похожих блюд
+            similar_meals_enumerate = []
             for id in meals_ids:
+
+                # Индекс исходного блюда в косинусной матрице
                 cos_sims_el_index = indixes[id]
-                print(cos_sims_el_index)
-        return
+
+                # Похожие 5 блюд по убыванию коэффициента
+                similarities = list(enumerate(cos_sims[cos_sims_el_index]))
+                similarities = sorted(similarities, key=lambda x: x[1], reverse=True)[1:6]
+                similar_meals_enumerate = sorted(similar_meals_enumerate + similarities, key=lambda x: x[1], reverse=True)
+
+
+         # TODO: Обработать момент, при котором отсутствует косинусная матрица
+         # TODO: Может заранее хранить индексы, а не открывать raw_recipes на чтение, все-таки он большой
+
+
+        return list(map(lambda x: x[0], similar_meals_enumerate))
 
 
     def get_recomendations_by_nutrition(self):
@@ -52,9 +66,9 @@ def init(args):
     fr = FoodRecomender()
     comand = args[0]
     payload = json.loads(args[1])
-    meals_ids = list(map(lambda x: x['id'], payload))
-    fr.get_recomendations_by_ingredients(meals_ids=meals_ids)
-    #print(meals_ids,  type(payload))
+    if comand == '1':
+        #meals_ids = list(map(lambda x: x['id'], payload))
+        meals_ids = payload
+        sys.stdout.write(json.dumps(fr.get_recomendations_by_ingredients(meals_ids=meals_ids)))
 
 init(sys.argv[1:])
-
